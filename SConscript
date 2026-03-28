@@ -1,3 +1,4 @@
+import os
 Import('env', 'envCython', 'arch', 'common')
 
 
@@ -18,7 +19,7 @@ msgq_python = envCython.Program('msgq/ipc_pyx.so', 'msgq/ipc_pyx.pyx', LIBS=envC
 
 # Build Vision IPC
 vipc_files = ['visionipc.cc', 'visionipc_server.cc', 'visionipc_client.cc']
-if arch == "larch64":
+if arch == "larch64" and os.path.exists('/dev/ion'):
   vipc_files += ['visionbuf_ion.cc']
 else:
   vipc_files += ['visionbuf.cc']
