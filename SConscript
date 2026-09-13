@@ -1,4 +1,4 @@
-Import('env', 'envCython', 'common')
+Import('env', 'envCython', 'common', 'arch')
 
 
 visionipc_dir = Dir('msgq/visionipc')
@@ -32,5 +32,9 @@ envCython.Program(f'{visionipc_dir.abspath}/visionipc_pyx.so', f'{visionipc_dir.
 
 if GetOption('extras'):
   env.Program('msgq/test_runner', ['msgq/msgq_tests.cc'], LIBS=[msgq]+common)
+  if arch != 'Darwin' and not File('/dev/ion').exists():
+    env_dma = env.Clone()
+    env_dma.Append(LINKFLAGS=['-Wl,--wrap=open,--wrap=ioctl'])
+    env_dma.Program('msgq/visionipc/test_visionbuf', ['msgq/visionipc/visionbuf_tests.cc', 'msgq/visionipc/visionbuf.cc'])
 
 Export('visionipc', 'msgq', 'msgq_python')

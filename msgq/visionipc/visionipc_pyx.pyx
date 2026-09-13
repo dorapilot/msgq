@@ -5,6 +5,7 @@ from libc.string cimport memcpy
 from libc.stdint cimport uint32_t, uint64_t
 from libcpp cimport bool
 from libcpp.string cimport string
+from contextlib import contextmanager
 
 from .visionipc cimport VisionIpcServer as cppVisionIpcServer
 from .visionipc cimport VisionIpcClient as cppVisionIpcClient
@@ -34,6 +35,18 @@ cdef class VisionBuf:
     return self.buf.width
 
   @property
+  def is_dma_buf(self):
+    return self.buf.is_dma_buf
+
+  @contextmanager
+  def cpu_access(self, bool write=False):
+    self.buf.begin_cpu_access(write)
+    try:
+      yield self.data
+    finally:
+      self.buf.end_cpu_access(write)
+
+  @property
   def height(self):
     return self.buf.height
 
@@ -48,6 +61,10 @@ cdef class VisionBuf:
   @property
   def idx(self):
     return self.buf.idx
+
+  @property
+  def server_id(self):
+    return self.buf.server_id
 
   @property
   def fd(self):
@@ -75,7 +92,9 @@ cdef class VisionIpcServer:
 
     # Populate buffer
     assert buf.len == len(data)
+    buf.begin_cpu_access(True)
     memcpy(buf.addr, &data[0], len(data))
+    buf.end_cpu_access(True)
     buf.set_frame_id(frame_id)
 
     cdef VisionIpcBufExtra extra

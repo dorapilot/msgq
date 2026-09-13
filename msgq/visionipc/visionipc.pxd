@@ -19,8 +19,12 @@ cdef extern from "msgq/visionipc/visionbuf.h":
     size_t stride
     size_t uv_offset
     size_t idx
-    void set_frame_id(uint64_t id)
-    uint64_t get_frame_id()
+    uint64_t server_id
+    bool is_dma_buf
+    void begin_cpu_access(bool) except +
+    void end_cpu_access(bool) except +
+    void set_frame_id(uint64_t id) except +
+    uint64_t get_frame_id() except +
 
 cdef extern from "msgq/visionipc/visionipc.h":
   struct VisionIpcBufExtra:
@@ -34,8 +38,8 @@ cdef extern from "msgq/visionipc/visionipc_server.h":
 
   cdef cppclass VisionIpcServer:
     VisionIpcServer(string)
-    void create_buffers(VisionStreamType, size_t, size_t, size_t)
-    void create_buffers_with_sizes(VisionStreamType, size_t, size_t, size_t, size_t, size_t, size_t)
+    void create_buffers(VisionStreamType, size_t, size_t, size_t) except +
+    void create_buffers_with_sizes(VisionStreamType, size_t, size_t, size_t, size_t, size_t, size_t) except +
     VisionBuf * get_buffer(VisionStreamType)
     void send(VisionBuf *, VisionIpcBufExtra *, bool)
     void start_listener()

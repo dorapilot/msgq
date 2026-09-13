@@ -15,6 +15,7 @@ catch2/
 /dist/
 
 test_runner
+test_visionbuf
 
 libmessaging.*
 libmessaging_shared.*

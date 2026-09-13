@@ -28,5 +28,7 @@ test:
     # *** tests ***
     test_runner:
       run: msgq/test_runner
+    test_visionbuf:
+      run: if [ "$(uname)" = Linux ] && [ ! -e /dev/ion ]; then msgq/visionipc/test_visionbuf; fi
     unittest:
       run: python -m unittest discover -t . -s msgq

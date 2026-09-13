@@ -14,6 +14,7 @@
 #include <linux/msm_ion.h>
 
 #include "msgq/visionipc/visionbuf.h"
+#include <system_error>
 
 // keep trying if x gets interrupted by a signal
 #define HANDLE_EINTR(x)                                       \
@@ -69,6 +70,7 @@ void VisionBuf::allocate(size_t length) {
   this->addr = mmap_addr;
   this->handle = ion_alloc.handle;
   this->fd = ion_fd_data.fd;
+  this->is_dma_buf = true;
   this->frame_id = (uint64_t*)((uint8_t*)this->addr + this->len);
 }
 
@@ -118,6 +120,18 @@ int VisionBuf::sync(int dir) {
 
   custom_data.arg = (unsigned long)&flush_data;
   return HANDLE_EINTR(ioctl(ion_fd(), ION_IOC_CUSTOM, &custom_data));
+}
+
+void VisionBuf::begin_cpu_access(bool) {
+  if (sync(VISIONBUF_SYNC_FROM_DEVICE) != 0) {
+    throw std::system_error(errno, std::generic_category(), "begin ION CPU access");
+  }
+}
+
+void VisionBuf::end_cpu_access(bool write) {
+  if (write && sync(VISIONBUF_SYNC_TO_DEVICE) != 0) {
+    throw std::system_error(errno, std::generic_category(), "end ION CPU access");
+  }
 }
 
 int VisionBuf::free() {

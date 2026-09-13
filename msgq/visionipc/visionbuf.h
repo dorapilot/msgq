@@ -36,11 +36,14 @@ class VisionBuf {
 
   // ion
   int handle = 0;
+  bool is_dma_buf = false;
 
   void allocate(size_t len);
   void import();
   void init_yuv(size_t width, size_t height, size_t stride, size_t uv_offset);
   int sync(int dir);
+  void begin_cpu_access(bool write = false);
+  void end_cpu_access(bool write = false);
   int free();
 
   void set_frame_id(uint64_t id);

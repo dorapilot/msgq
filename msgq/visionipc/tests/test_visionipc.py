@@ -61,11 +61,11 @@ class TestVisionIpc(unittest.TestCase):
 
     recv_buf = self.client.recv()
     assert recv_buf is not None
-    data = recv_buf.data
-    assert isinstance(data, memoryview)
-    assert struct.unpack_from("<Q", data, 0)[0] == 1234
-    assert len(data) == self.client.buffer_len
-    assert data[8:].nbytes == self.client.buffer_len - 8
+    with recv_buf.cpu_access() as data:
+      assert isinstance(data, memoryview)
+      assert struct.unpack_from("<Q", data, 0)[0] == 1234
+      assert len(data) == self.client.buffer_len
+      assert data[8:].nbytes == self.client.buffer_len - 8
     assert self.client.frame_id == 1337
     assert recv_buf.frame_id == 1337
 

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <random>
 #include <limits>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -48,14 +49,14 @@ void VisionIpcServer::create_buffers(VisionStreamType type, size_t num_buffers, 
 void VisionIpcServer::create_buffers_with_sizes(VisionStreamType type, size_t num_buffers, size_t width, size_t height, size_t size, size_t stride, size_t uv_offset) {
   // Create map + alloc requested buffers
   for (size_t i = 0; i < num_buffers; i++){
-    VisionBuf* buf = new VisionBuf();
+    auto buf = std::make_unique<VisionBuf>();
     buf->allocate(size);
     buf->idx = i;
     buf->type = type;
 
     buf->init_yuv(width, height, stride, uv_offset);
 
-    buffers[type].push_back(buf);
+    buffers[type].push_back(buf.release());
   }
 
   cur_idx[type] = 0;
